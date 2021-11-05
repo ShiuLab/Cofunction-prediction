@@ -2,7 +2,7 @@
 * Deposited get_all_SMF_DMF_data.py which combines all filters and combines all single mutant fitness (SMF) and double mutant fitness data (DMF)
 
 ```
-Usaage: pytohn get_all_SMF_DMF_data.py
+Usage: pytohn get_all_SMF_DMF_data.py
 ```
 
 * Created _instances_labels subfolder to keep track of scripts relevant for creating instance and labels of the dataset 
@@ -13,5 +13,5 @@ Usaage: pytohn get_all_SMF_DMF_data.py
 * Deposited script_feature_generation.py.
 
 ```
-Usaage: pytohn script_feature_generation.py input_file_name
+Usage: pytohn script_feature_generation.py input_file_name
 ```
