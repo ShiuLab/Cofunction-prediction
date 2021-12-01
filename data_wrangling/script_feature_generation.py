@@ -1,3 +1,10 @@
+'''
+Date: 12-1-21
+By: Ally Schumacher
+Description: making column output for "Pairs" -> "GenePairs" to make label merging possible (line 296)
+Usage: pytohn script_feature_generation.py input_file_name
+
+'''
 ################################################################################
 #
 # By: Shinhan Shiu
@@ -285,7 +292,7 @@ while inl != "":
     
     # Write header if not done already
     if out_header == 0:
-        oup.write("Pair\tFit1\tFit2\tFit12\t%s\n" % '\t'.join(f_gis2))
+        oup.write("GenePairs\tFit1\tFit2\tFit12\t%s\n" % '\t'.join(f_gis2))
         out_header = 1
     
     # Write all values

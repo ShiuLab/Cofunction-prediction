@@ -14,4 +14,4 @@ df3 = pd.merge(df1, df2, on="Pair") #if files can't merge, "Pair" might not be p
                                     #manually change this in the file
 #print(df3.head(5))
 
-df3.to_csv(r"/pathways_input_matrix_model1.csv", index=False, sep='\t')
+df3.to_csv(r"/pathways_input_matrix_model1.csv", index=False, sep='\t') #output entire matrix for MLpipeline input
