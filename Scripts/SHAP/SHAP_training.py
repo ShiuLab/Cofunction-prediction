@@ -4,7 +4,14 @@ PURPOSE: running shap on matrix data to better understand what features are most
 
 03/09/2022: Ally adjusts code to run on classification rather than regression
 
-"""
+USAGE EX: python /mnt/home/peipeiw/Documents/Ath_GS/SHAP/SHAP_training.py -df
+/mnt/home/peipeiw/Documents/Ath_GS/Models_for_Grimm_pheno/Input_data
+/GSE80744_TPM_383_accessions_loge_plus1.csv -df2
+/mnt/home/peipeiw/Documents/Ath_GS/Models_for_Grimm_pheno
+/Phenotype_value_383_common_accessions_2017_Grimm.csv -sep "," -y_name
+FT10_mean -test /mnt/home/peipeiw/Documents/Ath_GS/Models_for_Grimm_pheno
+/Test.txt -save expression -n_estimators 100 -max_depth 3 -max_features 0.5
+-n_jobs 8 -top 20 """
 
 import shap
 import sys, argparse
@@ -13,7 +20,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import datatable as dt
 import joblib
-from sklearn.ensemble import RandomForestRegressor
+from sklearn.ensemble import RandomForestClassifier
 
 
 def warn(*args, **kwargs):
@@ -30,7 +37,10 @@ def main():
         description='Calculate SHAP values, i.e., the contribution of each '
                     'feature to the prediction of each instance')
 
+    #######################
     ### Input arguments ###
+    #######################
+
     # Required
     req_group = parser.add_argument_group(title='REQUIRED INPUT')
     req_group.add_argument('-df',
@@ -92,7 +102,10 @@ def main():
     args.n_estimators = int(args.n_estimators)
     args.max_depth = int(args.max_depth)
 
+    ############################################
     ####### Load Dataframe & Pre-process #######
+    ############################################
+
     df = dt.fread(args.df, header=True, sep=args.sep)
     df = df.to_pandas()
     df = df.set_index(df.columns[0], drop=True)
@@ -165,11 +178,11 @@ def main():
     if args.model != '':
         my_model = joblib.load(args.model)
     else:
-        my_model = RandomForestRegressor(
+        my_model = RandomForestClassifier(
             n_estimators=int(args.n_estimators),
             max_depth=args.max_depth,
             max_features=args.max_features,
-            criterion='mse',
+            criterion='gini',
             random_state=42,
             n_jobs=args.n_jobs)
         my_model.fit(X_train, y_train)
