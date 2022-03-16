@@ -26,13 +26,15 @@
 # 03/03/2022 Ally added additional 4 orginal defitnions to read in segment without
 #	needing to merger two files together later
 #
+# 01/20/22 Ally changed the input separation delimiter to comma vs. original
+# '\t'
+#
+# 12/14/21 Ally added label to input file so output will also show labels
+# without
+#         needing to merge two files together labels to get with all features
 # 12/6/21 Ally found that only 6k pairs have features generated. Turned out that
 #   there was a division-by-zero error. Fixed.
-# 
-# 12/14/21 Ally added label to input file so output will also show labels without
-#         needing to merge two files together labels to get with all features
-#  
-# 01/20/22 Ally changed the input separation delimiter to comma vs. original '\t'
+#
 ################################################################################
 import sys, math, statistics
 
