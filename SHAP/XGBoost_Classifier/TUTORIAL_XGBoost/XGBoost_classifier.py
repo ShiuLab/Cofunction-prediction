@@ -2,11 +2,11 @@
 CREATED BY: Ally Schumacher
 CODE ADOPTED FROM: https://shap-lrjball.readthedocs.io/en/docs_update/
 example_notebooks/tree_explainer/Explaining%20the%20Loss%20of%20a%20Model.html
-PURPOSE: Understanding how XGBoost is implemented to later be applied to
+PURPOSE: Understanding how XGBoost_Tutorial is implemented to later be applied to
 personal research.
 
 NOTES: from https://machinelearningmastery.com/xgboost-loss-functions/
-    - What is XGBoost?
+    - What is XGBoost_Tutorial?
         - It's implementation of gradient boosting ensemble algorithm.
 
 """
@@ -64,17 +64,21 @@ X, y = shap.datasets.adult()
 print("X", '\n', X, '\n', "y", '\n', y)
 X_display, y_display = shap.datasets.adult(display=True)
 
-# create a train/test split
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2,
-                                                    random_state=7)
-# Understanding what each dataset looks likes
-#training
-print("X_train",'\n', X_train)
-print("y_train",'\n', y_train)
+print("X_display",'\n', X_display)
+print("y_display",'\n', y_display)
 
-#testing
-print("X_test",'\n', X_test)
-print("y_test",'\n', y_test)
+
+# # create a train/test split
+# X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2,
+#                                                     random_state=7)
+# # Understanding what each dataset looks likes
+# #training
+# print("X_train",'\n', X_train)
+# print("y_train",'\n', y_train)
+#
+# #testing
+# print("X_test",'\n', X_test)
+# print("y_test",'\n', y_test)
 
 
 # d_train = xgboost.DMatrix(X_train, label=y_train)
