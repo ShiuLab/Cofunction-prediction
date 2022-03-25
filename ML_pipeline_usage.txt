@@ -1,0 +1,13 @@
+# This document is to share the specifications used to run Shiu lab ML-pipeline
+
+### ML-Pipeline/ML_preprocessing.py ###
+python ./ML-Pipeline/ML_preprocess.py -df FILE -y_name 'label'
+
+### ML-Pipeline/test_set.py ###
+python ML-Pipeline/test_set.py -df FILE -type c -p 0.1 -y_name label -save
+./OUTPUT FILE LOCATION
+
+### ML-Pipeline/ML_classification.py ###
+python ML-Pipeline/ML_classification.py -df FILE -y_name 'label' -alg RF -test
+./Testset_FILE -x_norm t -gs_score roc_auc -save ./OUTPUT_FILE -cm t -plots t
+-gs_n 3 -n 1
