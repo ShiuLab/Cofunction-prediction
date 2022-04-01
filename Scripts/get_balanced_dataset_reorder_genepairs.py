@@ -27,7 +27,7 @@ import datatable as dt
 import pandas as pd
 from sklearn.utils import resample
 import numpy as np
-
+import sys
 ##############################################
 ######### READ IN FILES WITH ARGPARSE ########
 ##############################################
@@ -46,6 +46,11 @@ parser.add_argument(
 parser.add_argument('-y_name', '--y_name', help='Name of label column in '
                                            'dataframe,' \
                                           ' default=Class', default='Class')
+
+parser.add_argument('-instances', '--instances', help='Name of instance column in '
+                                           'dataframe,' \
+                                          ' default=Instance', default='Instance',
+                                          required = True)
 
 parser.add_argument('-sep', '--deliminator', help='Deliminator, default=","',
     default=',')
@@ -68,7 +73,7 @@ df = dt_df.to_pandas()
 
 df = df.replace(['?', 'NA', 'na', 'n/a', '', '.'], np.nan)
 
-print("Snap shot of input data", '\n', df.head())
+print("Snap shot of input data", '\n', df.iloc[:5,:5])
 print("Shape of input data ", '\n', df.shape)
 
 ### CATCH SITUATION WHERE "Y" IS INCORRECTLY SPECIFIED ###
@@ -81,6 +86,10 @@ except KeyError:
 # Specify class column - default = Class
 if args.y_name != 'Class':
     df = df.rename(columns={args.y_name: 'label'})
+
+# Specify instance column - default = Instance
+if args.instances != 'Instance':
+    df = df.rename(columns={args.instances: 'genepairs'})
 
 
 ###################
@@ -95,11 +104,11 @@ print("smallest class is", min_size, "out of", df.shape)
 
 # NEGATIVE SET DATA FRAME FOR ONLY THE LABELS
 df_neg = df.loc[df['label'] == 0]
-print("NEG DF ONLY:", '\n', df_neg)
+print("NEG DF ONLY:", '\n', df_neg.iloc[:5,:5])
 
 # POSITIVE SET DATA FRAME FOR ONLY THE LABELS
 df_pos = df.loc[df['label'] == 1]
-print("POS DF ONLY:", '\n', df_pos)
+print("POS DF ONLY:", '\n', df_pos.iloc[:5,:5])
 
 # DOWN SAMPLE THE MAJORITY CLASS
 df_neg_resampled = resample(df_neg['label'],
@@ -107,22 +116,22 @@ df_neg_resampled = resample(df_neg['label'],
                             n_samples=min_size,  # to match minority class
                             random_state=123)  # reproducible results
 
-print("dfneg_resampled", '\n', df_neg_resampled)
+print("dfneg_resampled", '\n', df_neg_resampled.head())
 
 ### GET INDEXES ###
 
 dfneg_index_list = list(df_neg_resampled.index.values)
-print("neg index list", '\n', dfneg_index_list)
+print("neg index list", '\n', dfneg_index_list[:10])
 
 dfpos_index_list = list(df_pos.index.values)
-print("pos index list", '\n', dfpos_index_list)
+print("pos index list", '\n', dfpos_index_list[:10])
 
 ### GET NEW DATAFRAME FROM SELECTED INDEXES ###
 df_pos_tomerge = df.loc[dfpos_index_list]
-print("DF pos only", '\n', df_pos_tomerge)
+print("DF pos only", '\n', df_pos_tomerge.iloc[:5,:5])
 
 df_neg_tomerge = df.loc[dfneg_index_list]
-print("DF neg only", '\n', df_neg_tomerge)
+print("DF neg only", '\n', df_neg_tomerge.iloc[:5,:5])
 
 print("Positive only data frame is:", df_pos_tomerge.shape, "and Negative "
                                                             "balanced subset "
@@ -147,15 +156,18 @@ print("neg data frame shape was", df_neg_tomerge.shape, "+",
 ### SEPARATE GENE PAIRS ###
 
 balanced_df[['gene1', 'gene2']] = df['genepairs'].str.split('_', expand=True)
-print("added seperated pairs in new column", '\n', balanced_df.head())
+print("added seperated pairs in new column", '\n', balanced_df.iloc[:10,:5])
 
 ### RE-ORDER
 balanced_df = balanced_df.drop(columns='genepairs')
 
+# balanced_df_list = list(balanced_df.columns)
+# print(balanced_df_list)
+# Below will not be used unless excluded all features except fitness
 balanced_df = balanced_df.filter(['gene1','gene2','label', 'Fit1','Fit2',
-                                 'Fit12'], axis=1)
+                                'Fit12'], axis=1)
 
-print("after dropping and rearranging column order", '\n', balanced_df.head())
+print("after dropping and rearranging column order", '\n', balanced_df.iloc[:10,:5])
 
 
 ### FIND THE BIGGEST FITNESS VALUE BETWEEN THE PAIR
@@ -163,22 +175,22 @@ print("after dropping and rearranging column order", '\n', balanced_df.head())
 df_g1bigger = balanced_df.loc[balanced_df['Fit1'] > balanced_df['Fit2']]
 df_g2bigger = balanced_df.loc[balanced_df['Fit2'] > balanced_df['Fit1']]
 
-print("Gene 1 bigger snapshot", '\n', df_g1bigger.head())
+print("Gene 1 bigger snapshot", '\n', df_g1bigger.iloc[:10,:5])
 print("Gene 1 bigger shape", '\n', df_g1bigger.shape)
 
-print("Gene 2 bigger snapshot", '\n', df_g2bigger.head())
+print("Gene 2 bigger snapshot", '\n', df_g2bigger.iloc[:10,:5])
 print("Gene 2 bigger shape", '\n', df_g2bigger.shape)
 
 
 ### REORDER AND SWITCH COLUMN NAMES ACCORDINGLY ###
 
 df_g2bigger = df_g2bigger[['gene2', 'gene1', 'label', 'Fit2', 'Fit1', 'Fit12']]
-print("Gene 2 after reorder", '\n', df_g2bigger.head())
+print("Gene 2 after reorder", '\n', df_g2bigger.iloc[:10,:5])
 print("Gene 2 after reorder shape", '\n', df_g2bigger.shape)
 
 df_g2bigger = df_g2bigger.rename(columns={'gene2': 'gene1', 'gene1': 'gene2',
                                           'Fit2': 'Fit1', 'Fit1': 'Fit2'})
-print("Gene 2 after rename", '\n', df_g2bigger.head())
+print("Gene 2 after rename", '\n', df_g2bigger.iloc[:10,:5])
 print("Gene 2 after rename", '\n', df_g2bigger.shape)
 
 
@@ -188,12 +200,14 @@ print("Gene 2 after rename", '\n', df_g2bigger.shape)
 
 dataframes = [df_g2bigger, df_g1bigger]
 merged = pd.concat(dataframes, axis=0).reset_index(drop=True)
-print("merged", '\n', merged.head())
+print("merged", '\n', merged.iloc[:10,:5])
 print("merged", '\n', merged.shape)
 
 merged['GenePairs'] = merged['gene1'].str.cat(merged['gene2'], sep="_")
-merged = merged.filter(['GenePairs', 'label', 'Fit1', 'Fit2', 'Fit12'], axis=1)
-print("final merge", '\n', merged.head())
+
+merged = merged.filter(['GenePairs', 'label', 'Fit1', 'Fit2', 'Fit12'],
+axis=1)
+print("final merge", '\n', merged.iloc[:10,:5])
 
 merged.to_csv(args.Output, index=False)
 
