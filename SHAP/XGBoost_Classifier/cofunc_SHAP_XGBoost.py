@@ -15,13 +15,14 @@ import xgboost
 import numpy as np
 import matplotlib.pylab as pl
 from sklearn.model_selection import train_test_split
+import joblib
 
 #############################
 ### WHERE TO SAVE FIGURES ###
 #############################
 
 PROJECT_ROOT_DIR = "."
-CHAPTER_ID = "XGBoost_Genepair_reoder"
+CHAPTER_ID = "Allp_balanced_reordered_XGBoost"
 IMAGES_PATH = os.path.join(PROJECT_ROOT_DIR, "images", CHAPTER_ID)
 os.makedirs(IMAGES_PATH, exist_ok=True)
 
@@ -51,7 +52,7 @@ file1 = Path(args.data)
 ### LOAD DATASET ###
 ####################
 
-dt_df = dt.fread(file1, sep=',')
+dt_df = dt.fread(file1, sep='\t')
 df = dt_df.to_pandas()
 df = df.set_index(df.columns[0], drop=True)
 
@@ -88,14 +89,18 @@ d_test = xgboost.DMatrix(X_test, label=y_test)
 
 params = {
     "eta": 0.01,
+    "max_depth": 6,
+    "subsample": 1,
     "objective": "binary:logistic",
-    "subsample": 0.5,
     "base_score": np.mean(y_train),
-    "eval_metric": "logloss"
+    "feature_selector": "cyclic",
+    "eval_metric": "auc"
 }
-model = xgboost.train(params, d_train, 5000, evals=[(d_test, "test")],
+model = xgboost.train(params, d_train, 100, evals=[(d_test, "test")],
                       verbose_eval=100, early_stopping_rounds=20)
 
+
+joblib.dump(model, 'allp_xgboost_model.joblib')
 ###################################
 ### CLASSIFY FEATURE ATTRIBUTES ###
 ###################################
@@ -124,20 +129,32 @@ pl.show()
 
 explainer = shap.TreeExplainer(model)
 shap_values = explainer.shap_values(X)
+shap_values_ind = shap.TreeExplainer(model).shap_values(X)
+
 
 # Visualize many predictions
-shap.force_plot(explainer.expected_value, shap_values[:100,:], X.iloc[:100,
+shap.force_plot(explainer.expected_value, shap_values[:10,:], X.iloc[:10,
                                                                :], show=False)
 # SHAP Summary Plot
 shap.summary_plot(shap_values, X_display, plot_type="dot",
                   alpha=0.8,show=False)
 save_fig("dot_summary_SHAP_alpha08")
 
-shap.summary_plot(shap_values, X_display, plot_type="violin",
-                  alpha=0.8,show=False)
-save_fig("violin_summary_SHAP_alpha08")
+# shap.summary_plot(shap_values[:10,:], X_display[:10,:], plot_type="violin",
+#                   alpha=0.8,show=False)
+# save_fig("violin_summary_SHAP_alpha08")
+#
+# shap.summary_plot(shap_values[:10,:], X_display[:10,:], plot_type="bar",
+#                   alpha=0.8,show=False)
+# save_fig("bar_summary_SHAP_alpha08")
 
-shap.summary_plot(shap_values, X_display, plot_type="bar",
-                  alpha=0.8,show=False)
-save_fig("bar_summary_SHAP_alpha08")
+# Dependence plots
+for name in X_train.columns:
+    shap.dependence_plot(name, shap_values, X, display_features=X_display,
+                         show=False)
+save_fig("dependence_SHAP")
 
+# Intereaction??
+for name in X_train.columns:
+    shap.dependence_plot(name, shap_values_ind, X, display_features=X_display,show=False)
+save_fig("interaction_shap")
